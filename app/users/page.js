@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+
+import React, { useEffect, useState } from "react";
 import {
   Container,
   TextField,
@@ -12,7 +13,11 @@ import {
   Paper,
   Pagination,
   CircularProgress,
+  Box,
+  Typography,
+  InputAdornment,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import useUsersStore from "../../store/useUsersStore";
 import ProtectedClient from "../../components/ProtectedClient";
 import { useRouter } from "next/navigation";
@@ -29,46 +34,77 @@ export default function UsersList() {
 
   return (
     <ProtectedClient>
-      <Container>
-        <h2>Users</h2>
-        <TextField
-          label="Search"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setPage(1);
-          }}
-          fullWidth
-        />
+      <Container maxWidth="lg">
+        {/* Header */}
+        <Box mt={4} mb={3}>
+          <Typography variant="h4" fontWeight="bold">
+            Users Management
+          </Typography>
+          <Typography color="text.secondary">
+            Search and manage registered users
+          </Typography>
+        </Box>
+
+        {/* Search */}
+        <Paper sx={{ p: 2, mb: 3 }}>
+          <TextField
+            fullWidth
+            placeholder="Search users by name or email"
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setPage(1);
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Paper>
+
+        {/*Table */}
         {loading ? (
-          <CircularProgress />
+          <Box display="flex" justifyContent="center" mt={6}>
+            <CircularProgress />
+          </Box>
         ) : (
-          <TableContainer component={Paper} sx={{ mt: 2 }}>
+          <TableContainer component={Paper} elevation={4}>
             <Table>
-              <TableHead>
+              <TableHead sx={{ backgroundColor: "#f4f6f8" }}>
                 <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Gender</TableCell>
-                  <TableCell>Phone</TableCell>
-                  <TableCell>Company</TableCell>
+                  <TableCell><b>Name</b></TableCell>
+                  <TableCell><b>Email</b></TableCell>
+                  <TableCell><b>Gender</b></TableCell>
+                  <TableCell><b>Phone</b></TableCell>
+                  <TableCell><b>Company</b></TableCell>
                 </TableRow>
               </TableHead>
+
               <TableBody>
                 {list.map((u) => (
                   <TableRow
                     key={u.id}
                     hover
                     onClick={() => router.push(`/users/${u.id}`)}
-                    style={{ cursor: "pointer" }}
+                    sx={{
+                      cursor: "pointer",
+                      "&:hover": {
+                        backgroundColor: "#f0f4ff",
+                      },
+                    }}
                   >
                     <TableCell>
                       {u.firstName} {u.lastName}
                     </TableCell>
                     <TableCell>{u.email}</TableCell>
-                    <TableCell>{u.gender}</TableCell>
+                    <TableCell sx={{ textTransform: "capitalize" }}>
+                      {u.gender}
+                    </TableCell>
                     <TableCell>{u.phone}</TableCell>
-                    <TableCell>{u.company?.name}</TableCell>
+                    <TableCell>{u.company?.name || "-"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -76,12 +112,15 @@ export default function UsersList() {
           </TableContainer>
         )}
 
-        <Pagination
-          sx={{ mt: 2 }}
-          count={Math.ceil(total / 10)}
-          page={page}
-          onChange={(e, v) => setPage(v)}
-        />
+        {/* Pagination */}
+        <Box display="flex" justifyContent="center" mt={4}>
+          <Pagination
+            count={Math.ceil(total / 10)}
+            page={page}
+            onChange={(e, v) => setPage(v)}
+            color="primary"
+          />
+        </Box>
       </Container>
     </ProtectedClient>
   );

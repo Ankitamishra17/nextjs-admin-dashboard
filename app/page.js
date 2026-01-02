@@ -1,7 +1,21 @@
 "use client";
+
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { TextField, Button, Container, Box, Typography } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Container,
+  Box,
+  Typography,
+  InputAdornment,
+  IconButton,
+  Paper,
+} from "@mui/material";
+import PersonIcon from "@mui/icons-material/Person";
+import LockIcon from "@mui/icons-material/Lock";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import axios from "axios";
 import useAuthStore from "@/store/useAuthStore";
 
@@ -10,6 +24,7 @@ export default function LoginPage() {
   const setAuth = useAuthStore((s) => s.setAuth);
 
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     username: "",
     password: "",
@@ -21,25 +36,19 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    console.log("Username:", form.username);
-    console.log("Password:", form.password);
-
     try {
       const res = await axios.post("https://dummyjson.com/auth/login", {
         username: form.username.trim(),
         password: form.password.trim(),
       });
 
-      const data = res.data;
-
       setAuth({
-        token: data.accessToken,
-        user: data,
+        token: res.data.accessToken,
+        user: res.data,
       });
 
       router.push("/dashboard");
     } catch (err) {
-      console.log("API Error:", err.response?.data);
       setError(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
@@ -47,47 +56,105 @@ export default function LoginPage() {
   };
 
   return (
-    <Container maxWidth="xs">
-      <Box mt={12} p={4} boxShadow={3} borderRadius={2}>
-        <Typography variant="h5" gutterBottom>
-          Admin Login
-        </Typography>
-
-        <form onSubmit={handleSubmit}>
-          <TextField
-            fullWidth
-            label="Username"
-            margin="normal"
-            value={form.username}
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
-          />
-
-          <TextField
-            fullWidth
-            label="Password"
-            type="password"
-            margin="normal"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-          />
-
-          {error && (
-            <Typography color="error" sx={{ mt: 1 }}>
-              {error}
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background:
+          "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
+      }}
+    >
+      <Container maxWidth="xs">
+        <Paper
+          elevation={10}
+          sx={{
+            p: 4,
+            borderRadius: 3,
+            backdropFilter: "blur(10px)",
+          }}
+        >
+          <Box textAlign="center" mb={3}>
+            <Typography variant="h4" fontWeight="bold">
+              Admin Panel
             </Typography>
-          )}
+            <Typography variant="body2" color="text.secondary">
+              Secure login to dashboard
+            </Typography>
+          </Box>
 
-          <Button
-            variant="contained"
-            type="submit"
-            fullWidth
-            disabled={loading}
-            sx={{ mt: 2 }}
-          >
-            {loading ? "Logging in..." : "Login"}
-          </Button>
-        </form>
-      </Box>
-    </Container>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              label="Username"
+              margin="normal"
+              value={form.username}
+              onChange={(e) =>
+                setForm({ ...form, username: e.target.value })
+              }
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <TextField
+              fullWidth
+              label="Password"
+              type={showPassword ? "text" : "password"}
+              margin="normal"
+              value={form.password}
+              onChange={(e) =>
+                setForm({ ...form, password: e.target.value })
+              }
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            {error && (
+              <Typography color="error" sx={{ mt: 1 }}>
+                {error}
+              </Typography>
+            )}
+
+            <Button
+              variant="contained"
+              type="submit"
+              fullWidth
+              size="large"
+              disabled={loading}
+              sx={{
+                mt: 3,
+                py: 1.2,
+                fontWeight: "bold",
+                background:
+                  "linear-gradient(135deg, #667eea, #764ba2)",
+              }}
+            >
+              {loading ? "Authenticating..." : "Login"}
+            </Button>
+          </form>
+        </Paper>
+      </Container>
+    </Box>
   );
 }

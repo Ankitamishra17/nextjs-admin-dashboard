@@ -1,19 +1,23 @@
 "use client";
-import {useState, useEffect} from "react";
+
+import { useState, useEffect } from "react";
 import {
   Typography,
   Container,
   TextField,
-   MenuItem,
+  MenuItem,
   Pagination,
-   Select,
-   Grid,
-   Card,
-   CardMedia ,
-     CardContent,
-
+  Select,
+  Grid,
+  Card,
+  CardMedia,
+  CardContent,
   CircularProgress,
+  Box,
+  Paper,
+  InputAdornment,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import useProductsStore from "../../store/useProductsStore";
 import ProtectedClient from "../../components/ProtectedClient";
 import axios from "axios";
@@ -40,37 +44,63 @@ export default function ProductsPage() {
 
   return (
     <ProtectedClient>
-      <Container>
-        <h2>Products</h2>
-        <TextField
-          label="Search"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setPage(1);
-          }}
-          sx={{ mr: 2 }}
-        />
-        <Select
-          value={category}
-          onChange={(e) => {
-            setCategory(e.target.value);
-            setPage(1);
-          }}
-          displayEmpty
-        >
-          <MenuItem value="">All Categories</MenuItem>
-          {categories.map((c) => (
-            <MenuItem key={c.slug} value={c.slug}>
-              {c.name}
-            </MenuItem>
-          ))}
-        </Select>
+      <Container maxWidth="lg">
+        {/* Header */}
+        <Box mt={4} mb={3}>
+          <Typography variant="h4" fontWeight="bold">
+            Products
+          </Typography>
+          <Typography color="text.secondary">
+            Browse and manage available products
+          </Typography>
+        </Box>
 
+        {/* Filters */}
+        <Paper sx={{ p: 2, mb: 3 }}>
+          <Box display="flex" gap={2} flexWrap="wrap">
+            <TextField
+              placeholder="Search products"
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setPage(1);
+              }}
+              sx={{ minWidth: 250 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <Select
+              value={category}
+              displayEmpty
+              onChange={(e) => {
+                setCategory(e.target.value);
+                setPage(1);
+              }}
+              sx={{ minWidth: 220 }}
+            >
+              <MenuItem value="">All Categories</MenuItem>
+              {categories.map((c) => (
+                <MenuItem key={c.slug} value={c.slug}>
+                  {c.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </Box>
+        </Paper>
+
+        {/* Loading */}
         {loading ? (
-          <CircularProgress />
+          <Box display="flex" justifyContent="center" mt={6}>
+            <CircularProgress />
+          </Box>
         ) : (
-          <Grid container spacing={2} sx={{ mt: 2 }}>
+          <Grid container spacing={3}>
             {list.map((p) => (
               <Grid
                 item
@@ -80,17 +110,39 @@ export default function ProductsPage() {
                 key={p.id}
                 onClick={() => router.push(`/products/${p.id}`)}
               >
-                <Card sx={{ cursor: "pointer" }}>
+                <Card
+                  sx={{
+                    cursor: "pointer",
+                    height: "100%",
+                    transition: "0.3s",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: 6,
+                    },
+                  }}
+                >
                   <CardMedia
                     component="img"
-                    height="140"
+                    height="180"
                     image={p.thumbnail}
                     alt={p.title}
                   />
+
                   <CardContent>
-                    <Typography variant="subtitle1">{p.title}</Typography>
-                    <Typography>
-                      ₹{p.price} • {p.category} • ⭐{p.rating}
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      gutterBottom
+                    >
+                      {p.title}
+                    </Typography>
+
+                    <Typography variant="body2" color="text.secondary">
+                      ₹{p.price} • {p.category}
+                    </Typography>
+
+                    <Typography variant="body2">
+                      ⭐ {p.rating}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -99,12 +151,15 @@ export default function ProductsPage() {
           </Grid>
         )}
 
-        <Pagination
-          sx={{ mt: 2 }}
-          count={Math.ceil(total / 10)}
-          page={page}
-          onChange={(e, v) => setPage(v)}
-        />
+        {/*  Pagination */}
+        <Box display="flex" justifyContent="center" mt={4}>
+          <Pagination
+            count={Math.ceil(total / 10)}
+            page={page}
+            onChange={(e, v) => setPage(v)}
+            color="primary"
+          />
+        </Box>
       </Container>
     </ProtectedClient>
   );

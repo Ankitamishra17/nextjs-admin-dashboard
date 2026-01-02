@@ -1,6 +1,15 @@
 "use client";
+
 import React from "react";
-import { Container, Typography, Box, Button } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Box,
+  Button,
+  AppBar,
+  Toolbar,
+  Paper,
+} from "@mui/material";
 import ProtectedClient from "../../components/ProtectedClient";
 import useAuthStore from "../../store/useAuthStore";
 import { useRouter } from "next/navigation";
@@ -11,23 +20,38 @@ export default function DashboardPage() {
 
   return (
     <ProtectedClient>
-      <Container>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mt={4}
-        >
-          <Typography variant="h4">Dashboard</Typography>
+      {/* Navbar */}
+      <AppBar
+        position="static"
+        elevation={0}
+        sx={{
+          background: "linear-gradient(135deg, #667eea, #764ba2)",
+        }}
+      >
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Typography variant="h6" fontWeight="bold">
+            Admin Dashboard
+          </Typography>
+
           <Box>
-            <Button variant="contained" onClick={() => router.push("/users")}>
+            <Button
+              variant="contained"
+              sx={{ mr: 1, backgroundColor: "#ffffff", color: "#764ba2" }}
+              onClick={() => router.push("/users")}
+            >
               Users
             </Button>
-            <Button sx={{ ml: 2 }} onClick={() => router.push("/products")}>
+
+            <Button
+              variant="contained"
+              sx={{ mr: 1, backgroundColor: "#ffffff", color: "#764ba2" }}
+              onClick={() => router.push("/products")}
+            >
               Products
             </Button>
+
             <Button
-              sx={{ ml: 2 }}
+              variant="contained"
               color="error"
               onClick={() => {
                 logout();
@@ -37,13 +61,28 @@ export default function DashboardPage() {
               Logout
             </Button>
           </Box>
-        </Box>
+        </Toolbar>
+      </AppBar>
 
-        <Box mt={4}>
-          <Typography>
-            Welcome to the admin dashboard. Use the left buttons to navigate.
+      {/*Dashboard Content */}
+      <Container maxWidth="lg">
+        <Paper
+          elevation={4}
+          sx={{
+            mt: 5,
+            p: 4,
+            borderRadius: 3,
+          }}
+        >
+          <Typography variant="h4" fontWeight="bold" gutterBottom>
+            Dashboard
           </Typography>
-        </Box>
+
+          <Typography color="text.secondary">
+            Welcome to the admin dashboard. Use the navigation buttons above to
+            manage users and products.
+          </Typography>
+        </Paper>
       </Container>
     </ProtectedClient>
   );
