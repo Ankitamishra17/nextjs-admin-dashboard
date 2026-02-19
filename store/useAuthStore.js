@@ -4,7 +4,7 @@ const useAuthStore = create((set) => ({
   token: null,
   user: null,
 
-  // 🔥 Restore auth from localStorage
+  // Restore auth from localStorage
   initialize: () => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");

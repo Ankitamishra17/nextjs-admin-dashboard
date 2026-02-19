@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
-import useAuthStore from "./useAuthStore";
+
 
 const API = "https://dummyjson.com";
 
