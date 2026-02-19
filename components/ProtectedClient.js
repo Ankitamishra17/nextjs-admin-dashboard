@@ -1,16 +1,26 @@
 "use client";
-import React, { useEffect } from "react";
+
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import useAuthStore from "../store/useAuthStore";
 
 export default function ProtectedClient({ children }) {
   const router = useRouter();
-  const token = useAuthStore((s) => s.token);
+  const { token, initialize } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!token) router.push("/");
-  }, [token, router]);
+    setMounted(true);
+    initialize();
+  }, []);
 
-  if (!token) return null; // or loading UI
-  return <>{children}</>;
+  useEffect(() => {
+    if (mounted && !token) {
+      router.push("/login");
+    }
+  }, [mounted, token]);
+
+  if (!mounted) return null;
+
+  return token ? children : null;
 }

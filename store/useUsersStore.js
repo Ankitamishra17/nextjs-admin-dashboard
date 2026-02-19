@@ -11,18 +11,37 @@ const useUsersStore = create((set, get) => ({
   query: "",
   limit: 10,
   skip: 0,
-  async fetchList({ query, limit = 10, skip = 0 } = {}) {
+  async fetchList({ query = "", limit = 10, skip = 0 } = {}) {
     set({ loading: true });
+
     try {
-      const url = query
-        ? `${API}/users/search?q=${encodeURIComponent(
-            query
-          )}&limit=${limit}&skip=${skip}`
-        : `${API}/users?limit=${limit}&skip=${skip}`;
-      const res = await axios.get(url);
+      // Fetch all users (DummyJSON has 100 total)
+      const res = await axios.get(`${API}/users?limit=100`);
+
+      let users = res.data.users || [];
+
+      // Client-side filtering
+      if (query) {
+        const q = query.toLowerCase();
+
+        users = users.filter(
+          (u) =>
+            u.firstName.toLowerCase().includes(q) ||
+            u.lastName.toLowerCase().includes(q) ||
+            u.email.toLowerCase().includes(q) ||
+            u.gender.toLowerCase().includes(q) ||
+            u.company?.name?.toLowerCase().includes(q),
+        );
+      }
+
+      const total = users.length;
+
+      // Apply pagination after filtering
+      const paginated = users.slice(skip, skip + limit);
+
       set({
-        list: res.data.users || res.data.products || [],
-        total: res.data.total || 0,
+        list: paginated,
+        total,
         loading: false,
         query,
         limit,
@@ -33,6 +52,7 @@ const useUsersStore = create((set, get) => ({
       throw err;
     }
   },
+
   async fetchById(id) {
     set({ loading: true });
     try {
